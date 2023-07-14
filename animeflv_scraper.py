@@ -12,10 +12,18 @@ class Animeflv(object):
     def anime_info(self,anime_id):
         
         http= requests.get(f"https://m.animeflv.net/anime/{anime_id}").text
-
-        self.title=re.findall(r"h1 class=\"Title\"[>](.*?)[<]",http)[0]
-        self.status=re.findall(r'<p><strong>Estado:<\/strong> <strong class="[^"]*">(.*?)<\/strong>',http)[0]
-        self.summary=re.findall(r"<p><strong>Sinopsis:<\/strong[>](.*?)[<]",http)[0]
+        try:
+            self.title=re.findall(r"h1 class=\"Title\"[>](.*?)[<]",http)[0]
+        except:
+            self.title=anime_id
+        try:
+            self.status=re.findall(r'<p><strong>Estado:<\/strong> <strong class="[^"]*">(.*?)<\/strong>',http)[0]
+        except:
+            self.status="Not Found"
+        try:
+            self.summary=re.findall(r"<p><strong>Sinopsis:<\/strong[>](.*?)[<]",http)[0]
+        except:
+            self.summary="Not Found"
         self.episodes=re.findall(r'href="/ver/([^"]+)"',http)
     
 
