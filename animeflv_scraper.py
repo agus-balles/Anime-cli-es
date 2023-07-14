@@ -1,6 +1,6 @@
 import requests
 import re
-
+from bs4 import BeautifulSoup
 class Animeflv(object):
 
     def search(self,query):
@@ -21,7 +21,7 @@ class Animeflv(object):
         except:
             self.status="Not Found"
         try:
-            self.summary=re.findall(r"<p><strong>Sinopsis:<\/strong[>](.*?)[<]",http)[0]
+            self.summary=re.findall(r"<p><strong>Sinopsis:<\/strong>([\s\S]*?)<",http)[0]
         except:
             self.summary="Not Found"
         self.episodes=re.findall(r'href="/ver/([^"]+)"',http)
