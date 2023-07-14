@@ -28,11 +28,19 @@ print(f"\033[1;92mEstado: \033[1;0m{status}")
 print(f"\033[1;92m \nResumen: \033[1;0m{summary}")
 
 j=1
-print("\033[1;32m\nEpisodios:\033[1;35m\n")
+print("\033[1;32m\nEpisodios:\033[1;35m")
 for episode in episode_list:
     print(f"[{j}]{episode}")
     j+=1
-episode_to_watch = int(input("Selecciona que episodio ver:"))
+
+episode_to_watch = int(input("\nSelecciona que episodio ver:"))
 episode_links = api.get_links(episode_to_watch)
-video=episode_links[episode_list[episode_to_watch-1]][0]
+
+video_links=episode_links[episode_list[episode_to_watch-1]]
+print("\033[1;0m\nElige un proveedor: \033[1;36m")
+j=1
+for provider in video_links:
+    print(f"[{j}]{provider}")
+    j+=1
+video=episode_links[episode_list[episode_to_watch-1]][int(input("Proveedor: "))-1]
 os.system(f"mpv ytdl://{video}")
