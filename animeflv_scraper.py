@@ -1,6 +1,6 @@
 import requests
 import re
-from bs4 import BeautifulSoup
+
 class Animeflv(object):
 
     def search(self,query):
