@@ -7,10 +7,14 @@ api = Animeflv()
 
 
 def watch_video(episode_list, episode_index,provider=0,passive=False):
+    episode_links = api.get_links(episode_index+1)
+    provider_string = episode_links[episode_list[episode_index]][provider][:11]
+    
     for i in range(len(episode_list)-episode_index):
         episode_links = api.get_links(episode_index+i+1)
         video_links=episode_links[episode_list[episode_index+i]]
-        video=episode_links[episode_list[episode_index+i]][provider]
+        video= [link for link in video_links if provider_string in link][0]
+        print(video)
         os.system(f"mpv ytdl://{video}")
 
         
