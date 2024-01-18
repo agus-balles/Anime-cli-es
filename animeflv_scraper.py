@@ -32,7 +32,7 @@ class Animeflv(object):
         episode_links = {}
         if type(episodes)==str:
             http_fragment = requests.get(f"https://m.animeflv.net/ver/{episodes}").text
-            url_pattern = r"https:\\\/\\\/ok.ru\\\/videoembed\\\/.*?\"|https:\\\/\\\/www.yourupload.com\\\/embed\\\/.*?\""
+            url_pattern = r"https:\\\/\\\/ok.ru\\\/videoembed\\\/.*?\"|https:\\\/\\\/www.yourupload.com\\\/embed\\\/.*?\"|https:\\\/\\\/streamwish.to\\\/e\\\/.*?\""
 
             links = re.findall(url_pattern, http_fragment)
             for i in range(len(links)):
@@ -41,7 +41,7 @@ class Animeflv(object):
         else:
             for episode in episodes:
                 http_fragment = requests.get(f"https://m.animeflv.net/ver/{episode}").text
-                url_pattern = r"https:\\\/\\\/ok.ru\\\/videoembed\\\/.*?\"|https:\\\/\\\/www.yourupload.com\\\/embed\\\/.*?\""
+                url_pattern = r"https:\\\/\\\/ok.ru\\\/videoembed\\\/.*?\"|https:\\\/\\\/www.yourupload.com\\\/embed\\\/.*?\"|https:\\\/\\\/streamwish.to\\\/e\\\/.*?\""
 
                 links = re.findall(url_pattern, http_fragment)
                 for i in range(len(links)):

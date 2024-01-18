@@ -5,6 +5,17 @@ import os
 
 api = Animeflv()
 
+
+def watch_video(episode_list, episode_index,provider=0,passive=False):
+    for i in range(len(episode_list)-episode_index):
+        episode_links = api.get_links(episode_index+i+1)
+        video_links=episode_links[episode_list[episode_index+i]]
+        video=episode_links[episode_list[episode_index+i]][provider]
+        os.system(f"mpv ytdl://{video}")
+
+        
+
+
 print("Que anime quieres ver?")
 
 possible_anime_id = api.search(input("Anime:\033[1;36m"))
@@ -35,14 +46,28 @@ for episode in episode_list:
     print(f"[{j}]{episode}")
     j+=1
 
-episode_to_watch = int(input("\nSelecciona que episodio ver:"))
-episode_links = api.get_links(episode_to_watch)
+episode_index = int(input("\nSelecciona que episodio ver:")) - 1
 
-video_links=episode_links[episode_list[episode_to_watch-1]]
+    
+episode_links = api.get_links(episode_index+1)
+
+video_links=episode_links[episode_list[episode_index]]
+
+
 print("\033[1;0m\nElige un proveedor: \033[1;36m")
 j=1
 for provider in video_links:
     print(f"[{j}]{provider}")
     j+=1
-video=episode_links[episode_list[episode_to_watch-1]][int(input("Proveedor: "))-1]
-os.system(f"mpv ytdl://{video}")
+provider = int(input("Proveedor: "))-1
+
+passive_choice = input("Desea activar la reproducción automática?(y/N): ")
+if passive_choice in ("Yy"):
+    passive=True
+else:
+    passive = False
+#    video=episode_links[episode_list[episode_index]][provider]
+#    os.system(f"mpv ytdl://{video}")
+
+watch_video(episode_list,episode_index,provider,passive)
+
