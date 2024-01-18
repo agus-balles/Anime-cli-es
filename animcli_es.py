@@ -8,13 +8,18 @@ api = Animeflv()
 
 def watch_video(episode_list, episode_index,provider=0,passive=False):
     episode_links = api.get_links(episode_index+1)
-    provider_string = episode_links[episode_list[episode_index]][provider][:11]
-    
-    for i in range(len(episode_list)-episode_index):
-        episode_links = api.get_links(episode_index+i+1)
-        video_links=episode_links[episode_list[episode_index+i]]
+    provider_string = episode_links[episode_list[episode_index]][provider][:14]
+    if passive ==True:
+        for i in range(len(episode_list)-episode_index):
+            episode_links = api.get_links(episode_index+i+1)
+            video_links=episode_links[episode_list[episode_index+i]]
+            video= [link for link in video_links if provider_string in link][0]
+            print(f"Episodio {episode_index+i+1}:\n{video}")
+            os.system(f"mpv ytdl://{video}")
+    else:
+        video_links=episode_links[episode_list[episode_index]]
         video= [link for link in video_links if provider_string in link][0]
-        print(video)
+        print(f"Episodio {episode_index+1}:\n{video}")
         os.system(f"mpv ytdl://{video}")
 
         
@@ -66,7 +71,7 @@ for provider in video_links:
 provider = int(input("Proveedor: "))-1
 
 passive_choice = input("Desea activar la reproducción automática?(y/N): ")
-if passive_choice in ("Yy"):
+if passive_choice in ("Yy") and passive_choice!="":
     passive=True
 else:
     passive = False
