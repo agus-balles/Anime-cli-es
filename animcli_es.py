@@ -2,9 +2,17 @@
 
 from animeflv_scraper import Animeflv
 import os
+import argparse
 
 api = Animeflv()
 
+parser=argparse.ArgumentParser(description="Mira anime subtitulado en español.")
+
+parser.add_argument("-A","--anime", type=str, help="Titulo del Anime")
+parser.add_argument("-C","--capitulo",type=int,help="Capitulo del Anime")
+parser.add_argument("-R","--reproduccion_automatica",action="store_true",help="Reproduce los siguientes episodios automáticamente.")
+
+args=parser.parse_args()
 
 def watch_video(episode_list, episode_index,provider=0,passive=False):
     episode_links = api.get_links(episode_index+1)
@@ -24,44 +32,53 @@ def watch_video(episode_list, episode_index,provider=0,passive=False):
 
         
 
+if args.anime:
+    anime_id = api.search(args.anime)[0]
+    animeinfo = api.anime_info(anime_id)
 
-print("Que anime quieres ver?")
+else:
+    print("Que anime quieres ver?")
+    possible_anime_id = api.search(input("Anime:\033[1;36m"))
 
-possible_anime_id = api.search(input("Anime:\033[1;36m"))
+    j=1
+    print("\nResultados:\n")
+    for anime in possible_anime_id:
+        print(f"[{j}]{anime}")
+        j+=1
+    anime_num = int(input("\033[1;0mSelecciona uno:"))-1
 
-j=1
-print("\nResultados:\n")
-for anime in possible_anime_id:
-    print(f"[{j}]{anime}")
-    j+=1
-anime_num = int(input("\033[1;0mSelecciona uno:"))-1
+    anime_id=possible_anime_id[anime_num]
 
-anime_id=possible_anime_id[anime_num]
+    animeinfo = api.anime_info(anime_id)
 
-animeinfo = api.anime_info(anime_id)
+    title = api.anime_title()
+    status = api.anime_status()
+    summary = api.anime_summary()
+    
 
-title = api.anime_title()
-status = api.anime_status()
-summary = api.anime_summary()
+    print(f"\033[1;92m \nTítulo: \033[1;0m{title}")
+    print(f"\033[1;92mEstado: \033[1;0m{status}")
+    print(f"\033[1;92m \nResumen: \033[1;0m{summary}")
+
 episode_list = api.anime_episodes()
 
-print(f"\033[1;92m \nTítulo: \033[1;0m{title}")
-print(f"\033[1;92mEstado: \033[1;0m{status}")
-print(f"\033[1;92m \nResumen: \033[1;0m{summary}")
+if args.anime and args.capitulo:
+    episode_index = args.capitulo - 1
+elif args.capitulo and not args.anime:
+    parser.error("No se puede especificar el capitulo sin especificar el anime.")
+else:
+    j=1
+    print("\033[1;32m\nEpisodios:\033[1;35m")
+    for episode in episode_list:
+        print(f"[{j}]{episode}")
+        j+=1
 
-j=1
-print("\033[1;32m\nEpisodios:\033[1;35m")
-for episode in episode_list:
-    print(f"[{j}]{episode}")
-    j+=1
-
-episode_index = int(input("\nSelecciona que episodio ver:")) - 1
+    episode_index = int(input("\nSelecciona que episodio ver:")) - 1
 
     
 episode_links = api.get_links(episode_index+1)
 
 video_links=episode_links[episode_list[episode_index]]
-
 
 print("\033[1;0m\nElige un proveedor: \033[1;36m")
 j=1
@@ -70,11 +87,14 @@ for provider in video_links:
     j+=1
 provider = int(input("Proveedor: "))-1
 
-passive_choice = input("Desea activar la reproducción automática?(y/N): ")
-if passive_choice in ("Yy") and passive_choice!="":
-    passive=True
+if args.reproduccion_automatica:
+    passive = True
 else:
-    passive = False
+    passive_choice = input("Desea activar la reproducción automática?(y/N): ")
+    if passive_choice in ("Yy") and passive_choice!="":
+        passive=True
+    else:
+        passive = False
 #    video=episode_links[episode_list[episode_index]][provider]
 #    os.system(f"mpv ytdl://{video}")
 
