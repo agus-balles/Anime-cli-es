@@ -1,2 +1,2 @@
 # AnimeFLV-Scraper
-Right now only yourupload and okru are supported.Improvements are welcomed
+Right now  wishembed,yourupload,streamwish and okru are supported.Improvements are welcomed
