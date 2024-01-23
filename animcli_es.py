@@ -12,6 +12,7 @@ parser.add_argument("-A","--anime", type=str, help="Titulo del Anime")
 parser.add_argument("-C","--capitulo",type=int,help="Capitulo del Anime")
 parser.add_argument("-R","--reproduccion_automatica",action="store_true",help="Reproduce los siguientes episodios automáticamente.")
 parser.add_argument("-D","--descarga",action="store_true",help="Descarga este episodio, y si se selecciona, los subsiguientes")
+parser.add_argument("-S","--buscar",type=str,help="Muestra Resultados de la busqueda de un anime")
 
 args=parser.parse_args()
 
@@ -24,7 +25,7 @@ def watch_video(anime,episode_list, episode_index,provider=0,passive=False):
             video_links=episode_links[episode_list[episode_index+i]]
             video= [link for link in video_links if provider_string in link][0]
             print(f"\033[1;36mEpisodio {episode_index+i+1}:\n{video}")
-            os.system(f"mpv ytdl://{video} --force-media-title=\"{anime} - Episodio: {episode_index+1}\"")
+            os.system(f"mpv ytdl://{video} --force-media-title=\"{anime} - Episodio: {episode_index+1+i}\"")
     else:
         video_links=episode_links[episode_list[episode_index]]
         video= [link for link in video_links if provider_string in link][0]
@@ -42,13 +43,22 @@ def download_video(anime_id,episode_list,episode_index,provider=0,download_follo
             video_links=episode_links[episode_list[episode_index+i]]
             video= [link for link in video_links if provider_string in link][0]
             print(f"\033[1;36mDescargando Episodio {episode_index+i+1}:\n{video}")
-            os.system(f"yt-dlp -N 8 {video} -o {anime_id}\/{episode_list[episode_index+i]} ")
+            os.system(f"yt-dlp -N 8 {video} -o {anime_id}\/{episode_list[episode_index+i+1]}.mp4 ")
     else:
         video_links=episode_links[episode_list[episode_index]]
         video= [link for link in video_links if provider_string in link][0]
         print(f"\033[1;36mDescargando episodio {episode_index+1}:\n{video}")
-        os.system(f"yt-dlp -N 8 {video} -o {anime_id}\/{episode_list[episode_index]}")
-
+        os.system(f"yt-dlp -N 8 {video} -o {anime_id}\/{episode_list[episode_index+1]}.mp4")
+        
+if args.buscar:
+    results = api.search(args.buscar)
+    print(f"\033[1;36mResultados:")
+    j=1
+    for result in results:
+        print(f"\033[1;36m[{j}]{result}")
+        j+=1
+    exit()
+    
 if args.anime:
     anime_id = api.search(args.anime)[0]
     animeinfo = api.anime_info(anime_id)
