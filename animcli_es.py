@@ -18,17 +18,15 @@ args=parser.parse_args()
 
 def watch_video(anime,episode_list, episode_index,provider=0,passive=False):
     episode_links = api.get_links(episode_index+1)
-    provider_string = episode_links[episode_list[episode_index]][provider][:14]
+    provider_string = episode_links[provider][:14]
     if passive ==True:
         for i in range(len(episode_list)-episode_index):
             episode_links = api.get_links(episode_index+i+1)
-            video_links=episode_links[episode_list[episode_index+i]]
-            video= [link for link in video_links if provider_string in link][0]
+            video= [link for link in episode_links if provider_string in link][0]
             print(f"\033[1;36mEpisodio {episode_index+i+1}:\n{video}")
             os.system(f"mpv ytdl://{video} --force-media-title=\"{anime} - Episodio: {episode_index+1+i}\"")
     else:
-        video_links=episode_links[episode_list[episode_index]]
-        video= [link for link in video_links if provider_string in link][0]
+        video= [link for link in episode_links if provider_string in link][0]
         print(f"Episodio {episode_index+1}:\n{video}")
         os.system(f"mpv ytdl://{video} --force-media-title=\"{anime} - Episodio {episode_index+1}\"")
 
@@ -36,19 +34,17 @@ def download_video(anime_id,episode_list,episode_index,provider=0,download_follo
     if not os.path.isdir(anime_id):
         os.mkdir(anime_id)
     episode_links = api.get_links(episode_index+1)
-    provider_string = episode_links[episode_list[episode_index]][provider][:14]
+    provider_string = episode_links[provider][:14]
     if download_following ==True:
         for i in range(len(episode_list)-episode_index):
             episode_links = api.get_links(episode_index+i+1)
-            video_links=episode_links[episode_list[episode_index+i]]
-            video= [link for link in video_links if provider_string in link][0]
-            print(f"\033[1;36mDescargando Episodio {episode_index+i+1}:\n{video}")
-            os.system(f"yt-dlp -N 8 {video} -o {anime_id}\/{episode_list[episode_index+i+1]}.mp4 ")
+            video= [link for link in episode_links if provider_string in link][0]
+            print(f"\033[1;36mDescargando Episodio {episode_index+1+i}:\n{video}")
+            os.system(f"yt-dlp -N 8 {video} -o {anime_id}\/{episode_list[episode_index+i]}.mp4 ")
     else:
-        video_links=episode_links[episode_list[episode_index]]
-        video= [link for link in video_links if provider_string in link][0]
+        video= [link for link in episode_links if provider_string in link][0]
         print(f"\033[1;36mDescargando episodio {episode_index+1}:\n{video}")
-        os.system(f"yt-dlp -N 8 {video} -o {anime_id}\/{episode_list[episode_index+1]}.mp4")
+        os.system(f"yt-dlp -N 8 {video} -o {anime_id}\/{episode_list[episode_index]}.mp4")
         
 if args.buscar:
     results = api.search(args.buscar)
@@ -106,11 +102,9 @@ else:
     
 episode_links = api.get_links(episode_index+1)
 
-video_links=episode_links[episode_list[episode_index]]
-
 print("\033[1;0m\nElige un proveedor: \033[1;36m")
 j=1
-for provider in video_links:
+for provider in episode_links:
     print(f"[{j}]{provider}")
     j+=1
 provider = int(input("Proveedor: "))-1

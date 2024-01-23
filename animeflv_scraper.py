@@ -37,7 +37,6 @@ class Animeflv(object):
 
     def get_links(self,episode_to_watch):
         episode = self.episodes[episode_to_watch-1]
-        episode_links = {}
         http_fragment = requests.get(f"https://m.animeflv.net/ver/{episode}").text
         #http_fragment = requests.get(f"https://www1.animeflv.ws/{episode}").text
 
@@ -47,8 +46,7 @@ class Animeflv(object):
         links = re.findall(url_pattern, http_fragment)
         for i in range(len(links)):
             links[i] = links[i].replace("\\","").strip('"')
-            episode_links[episode] = links 
-        return episode_links
+        return links
     
     def anime_title(self):
         return self.title
