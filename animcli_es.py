@@ -3,6 +3,7 @@
 from animeflv_scraper import Animeflv
 import os
 import argparse
+from requests import head 
 
 api = Animeflv()
 
@@ -56,7 +57,11 @@ if args.buscar:
     exit()
     
 if args.anime:
-    anime_id = api.search(args.anime)[0]
+    r = head(f"https://m.animeflv.net/anime/{args.anime}")
+    if r.status_code == 200:
+        anime_id = args.anime
+    else:
+        anime_id = api.search(args.anime)[0]
     animeinfo = api.anime_info(anime_id)
     title = api.anime_title()
 
