@@ -25,14 +25,17 @@ def watch_video(anime,episode_list, episode_index,provider=0,passive=False):
             episode_links = api.get_links(episode_index+i+1)
             video= [link for link in episode_links if provider_string in link][0]
             print(f"\033[1;36mEpisodio {episode_index+i+1}:\n{video}")
-            os.system(f"mpv ytdl://{video} --force-media-title=\"{anime} - Episodio: {episode_index+1+i}\"")
+            if os.name == "nt":
+                os.system(f"mpv ytdl://{video} --title=\"{anime} - Episodio: {episode_index+1+i}\"")
+            else:
+                os.system(f"mpv ytdl://{video} --force-media-title=\"{anime} - Episodio: {episode_index+1+i}\"")
     else:
         video= [link for link in episode_links if provider_string in link][0]
         print(f"Episodio {episode_index+1}:\n{video}")
         if os.name == "nt":
-            os.system(f"mpv ytdl://{video} --title=\"{anime} - Episodio: {episode_index+1+i}\"")
+            os.system(f"mpv ytdl://{video} --title=\"{anime} - Episodio: {episode_index+1}\"")
         else:
-            os.system(f"mpv ytdl://{video} --force-media-title=\"{anime} - Episodio: {episode_index+1+i}\"")
+            os.system(f"mpv ytdl://{video} --force-media-title=\"{anime} - Episodio: {episode_index+1}\"")
 
 def download_video(anime_id,episode_list,episode_index,provider=0,download_following=False):
     if not os.path.isdir(anime_id):
