@@ -33,6 +33,7 @@ def watch_video(anime,episode_list, episode_index,provider=0,passive=False):
             video= [link for link in episode_links if provider_string in link][0]
             print(f"\033[1;36mEpisodio {episode_index+i+1}:\n{video}")
             player["force-media-title"]=f"{anime} - Episodio: {episode_index+1+i}"
+            player["title"]=f"{anime} - Episodio: {episode_index+1+i}"
             player.play("ytdl://"+video)
             player.wait_for_playback()
             player.terminate()
@@ -41,6 +42,7 @@ def watch_video(anime,episode_list, episode_index,provider=0,passive=False):
         player = create_player()
         print(f"Episodio {episode_index+1}:\n{video}")
         player["force-media-title"]=f"{anime} - Episodio: {episode_index+1}"
+        player["title"]=f"{anime} - Episodio: {episode_index+1}"
         player.play("ytdl://"+video)
         player.wait_for_playback()
         player.terminate()
