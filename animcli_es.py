@@ -4,10 +4,12 @@ from animeflv_scraper import Animeflv
 import os
 import argparse
 from requests import head 
+import mpv
 
 api = Animeflv()
 
 parser=argparse.ArgumentParser(description="Mira anime subtitulado en español.")
+
 
 parser.add_argument("-A","--anime", type=str, help="Titulo del Anime")
 parser.add_argument("-C","--capitulo",type=int,help="Capitulo del Anime")
@@ -17,31 +19,38 @@ parser.add_argument("-S","--buscar",type=str,help="Muestra Resultados de la busq
 
 args=parser.parse_args()
 
+def create_player():
+    player = mpv.MPV(ytdl=True,osc=True,input_default_bindings=True,input_vo_keyboard=True)
+    return player
+
 def watch_video(anime,episode_list, episode_index,provider=0,passive=False):
     episode_links = api.get_links(episode_index+1)
     provider_string = episode_links[provider][:14]
     if passive ==True:
         for i in range(len(episode_list)-episode_index):
+            player = create_player()
             episode_links = api.get_links(episode_index+i+1)
             video= [link for link in episode_links if provider_string in link][0]
             print(f"\033[1;36mEpisodio {episode_index+i+1}:\n{video}")
-            if os.name == "nt":
-                os.system(f"mpv ytdl://{video} --title=\"{anime} - Episodio: {episode_index+1+i}\"")
-            else:
-                os.system(f"mpv ytdl://{video} --force-media-title=\"{anime} - Episodio: {episode_index+1+i}\"")
+            player["force-media-title"]=f"{anime} - Episodio: {episode_index+1+i}"
+            player.play("ytdl://"+video)
+            player.wait_for_playback()
+            player.terminate()
     else:
         video= [link for link in episode_links if provider_string in link][0]
+        player = create_player()
         print(f"Episodio {episode_index+1}:\n{video}")
-        if os.name == "nt":
-            os.system(f"mpv ytdl://{video} --title=\"{anime} - Episodio: {episode_index+1}\"")
-        else:
-            os.system(f"mpv ytdl://{video} --force-media-title=\"{anime} - Episodio: {episode_index+1}\"")
+        player["force-media-title"]=f"{anime} - Episodio: {episode_index+1}"
+        player.play("ytdl://"+video)
+        player.wait_for_playback()
+        player.terminate()
+        
 
 def download_video(anime_id,episode_list,episode_index,provider=0,download_following=False):
     if not os.path.isdir(anime_id):
         os.mkdir(anime_id)
     episode_links = api.get_links(episode_index+1)
-    provider_string = episode_links[provider][:14]
+    provider_string = episode_links[provider][:15]
     if download_following ==True:
         for i in range(len(episode_list)-episode_index):
             episode_links = api.get_links(episode_index+i+1)
@@ -53,6 +62,7 @@ def download_video(anime_id,episode_list,episode_index,provider=0,download_follo
         print(f"\033[1;36mDescargando episodio {episode_index+1}:\n{video}")
         episode_path=os.path.join(".",anime_id,episode_list[episode_index])
         os.system(f"yt-dlp -N 8 {video} -o {episode_path}.mp4")        
+        
 if args.buscar:
     results = api.search(args.buscar)
     print(f"\033[1;36mResultados:")
