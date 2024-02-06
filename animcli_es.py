@@ -3,7 +3,21 @@
 from animeflv_scraper import Animeflv
 import os
 import argparse
-from requests import head 
+from requests import head,get
+
+if os.name == "nt":
+    if not os.path.exists(os.path.dirname(__file__)+"\\yt-dlp.exe"):
+        print("Descargando depencia yt-dlp:...")
+        open(f'{os.path.dirname(__file__)}\\yt-dlp.exe', 'wb').write(get('https://raw.githubusercontent.com/agus-balles/files/main/yt-dlp.exe').content)
+    if not os.path.exists(os.path.dirname(__file__)+".\\libmpv-2.dll"):
+        from zipfile import ZipFile
+        print("Descargando Dependencia libmpv:...")
+        open(f'{os.path.dirname(__file__)}\\libmpv-2.zip', 'wb').write(get('https://raw.githubusercontent.com/agus-balles/files/main/libmpv-2.zip').content)
+        print("Extrayendo depencia libmpv-2.dll:...")
+        ZipFile(f"{os.path.dirname(__file__)}\\libmpv-2.zip","r").extractall(os.path.dirname(__file__))
+        os.remove(f"{os.path.dirname(__file__)}\\libmpv-2.zip")
+    os.environ["PATH"] = os.path.dirname(__file__) + os.pathsep + os.environ["PATH"]
+
 import mpv
 
 api = Animeflv()
