@@ -31,6 +31,10 @@ class Animeflv(object):
             #self.summary=re.findall(r"div class=\"Description\"[>](.*?)[<]",http)[0]
         except:
             self.summary="Not Found"
+        try:
+            self.cover = re.findall(r'https:\/\/animeflv.net\/uploads\/animes\/covers\/.*?(?=\")',http)[0]
+        except:
+            self.cover = None
         self.episodes=re.findall(r'href="/ver/([^"]+)"',http)
         #self.episodes=[anime_id + episode for episode in (re.findall(fr'href="/{anime_id}([^"]+)"',http))][::-1]
     
@@ -59,4 +63,7 @@ class Animeflv(object):
     
     def anime_episodes(self):
         return self.episodes
+    
+    def anime_cover(self):
+        return self.cover
 
