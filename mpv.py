@@ -17,7 +17,7 @@
 #
 # You can find copies of the GPLv2 and LGPLv2.1 licenses in the project repository's LICENSE.GPL and LICENSE.LGPL files.
 
-__version__ = '1.0.5'
+__version__ = '1.0.7'
 
 from ctypes import *
 import ctypes.util
@@ -49,7 +49,7 @@ else:
 
     sofile = ctypes.util.find_library('mpv')
     if sofile is None:
-        raise OSError("Cannot find libmpv in the usual places. Depending on your distro, you may try installing an mpv-devel or mpv-libs package such as libmpv1 for debian/ubuntu. If you have libmpv around but this script can't find it, consult the documentation for ctypes.util.find_library which this script uses to look up the library filename.")
+        raise OSError("Cannot find libmpv in the usual places. Depending on your distro, you may try installing an mpv-devel or mpv-libs package. If you have libmpv around but this script can't find it, consult the documentation for ctypes.util.find_library which this script uses to look up the library filename.")
     backend = CDLL(sofile)
     fs_enc = sys.getfilesystemencoding()
 
@@ -893,6 +893,8 @@ class MPV(object):
             self._event_thread.start()
         else:
             self._event_thread = None
+        if (m := re.search(r'(\d+)\.(\d+)\.(\d+)', self.mpv_version)):
+            self.mpv_version_tuple = tuple(map(int, m.groups()))
 
     @contextmanager
     def _enqueue_exceptions(self):
@@ -1034,30 +1036,38 @@ class MPV(object):
                 rv = cond(val)
                 if rv:
                     result.set_result(rv)
+
+            except InvalidStateError:
+                pass
+
             except Exception as e:
                 try:
                     result.set_exception(e)
-                except InvalidStateError:
+                except:
                     pass
-            except InvalidStateError:
-                pass
-        self.observe_property(name, observer)
-        err_unregister = self._set_error_handler(result)
 
         try:
             result.set_running_or_notify_cancel()
+
+            self.observe_property(name, observer)
+            err_unregister = self._set_error_handler(result)
             if catch_errors:
                 self._exception_futures.add(result)
 
             yield result
 
-            rv = cond(getattr(self, name.replace('-', '_')))
-            if level_sensitive and rv:
-                result.set_result(rv)
+            if level_sensitive:
+                rv = cond(getattr(self, name.replace('-', '_')))
+                if rv:
+                    result.set_result(rv)
+                    return
 
-            else:
-                self.check_core_alive()
-                result.result(timeout)
+            self.check_core_alive()
+            result.result(timeout)
+
+        except InvalidStateError:
+            pass
+
         finally:
             err_unregister()
             self.unobserve_property(name, observer)
@@ -1324,9 +1334,16 @@ class MPV(object):
     def _encode_options(options):
         return ','.join('{}={}'.format(_py_to_mpv(str(key)), str(val)) for key, val in options.items())
 
-    def loadfile(self, filename, mode='replace', **options):
+    def loadfile(self, filename, mode='replace', index=None, **options):
         """Mapped mpv loadfile command, see man mpv(1)."""
-        self.command('loadfile', filename.encode(fs_enc), mode, MPV._encode_options(options))
+        if self.mpv_version_tuple >= (0, 38, 0):
+            if index is None:
+                index = -1
+            self.command('loadfile', filename.encode(fs_enc), mode, index, MPV._encode_options(options))
+        else:
+            if index is not None:
+                warn(f'The index argument to the loadfile command is only supported on mpv >= 0.38.0')
+            self.command('loadfile', filename.encode(fs_enc), mode, MPV._encode_options(options))
 
     def loadlist(self, playlist, mode='replace'):
         """Mapped mpv loadlist command, see man mpv(1)."""
@@ -1812,9 +1829,6 @@ class MPV(object):
                             pass
                     else:
                         warnings.warn(f'Unhandled exception {e} inside stream open callback for URI {uri}\n{traceback.format_exc()}')
-
-
-
                     return ErrorCode.LOADING_FAILED
 
                 cb_info.contents.cookie = None
